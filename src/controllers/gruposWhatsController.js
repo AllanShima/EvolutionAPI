@@ -67,7 +67,7 @@ const GruposWhatsController = {
         // Resposta de sucesso
         res.status(200).json({ 
             success: true,
-            id: result.insertId, 
+            id_grupoWhats, 
             nome_do_grupo,
             link_de_convite,
             capacidade_max

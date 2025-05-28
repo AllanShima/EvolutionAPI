@@ -1,19 +1,19 @@
 FROM node:18-alpine
 
-# Define o diretório de trabalho para a pasta do backend
-WORKDIR /usr/src/app/src/backend
+WORKDIR /usr/src/app
 
-# 1. Copia os arquivos de dependência
-COPY src/backend/package*.json ./
+COPY package*.json ./
 
-# 2. Instala as dependências
 RUN npm install
 
-# 3. Copia todo o conteúdo do backend
-COPY src/backend/ .
+COPY . .
 
-# 4. Expõe a porta
+# Adicione esta linha para garantir que as variáveis sejam carregadas
+RUN echo "DB_HOST=mysql" >> .env && \
+    echo "DB_USER=root" >> .env && \
+    echo "DB_PASSWORD=root" >> .env && \
+    echo "DB_NAME=TrayWhatsDB" >> .env
+
 EXPOSE 3000
 
-# 5. Comando de execução
-CMD ["node", "server.js"]
+CMD ["node", "src/backend/server.js"]

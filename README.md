@@ -6,6 +6,7 @@ npm i @prisma/client@latest
 
 Pra rodar:
 - Abra o Docker Desktop (ou instala primeiro);
+- cd "C:\Users\allan\Desktop\Projetos VSCODE\API\EvolutionAPI\src\backend"
 - Roda no terminal "docker compose up -d"
 
 Sempre que quiser iniciar ele, aperta Play direto no docker, ou digita no terminal do projeto "docker compose up"

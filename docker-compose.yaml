@@ -6,6 +6,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: evolution
+      # MYSQL_DATABASE_TRAY: TrayWhatsDB (utilize ele pra criar o banco automaticamente)
     ports:
       - "3306:3306"
     volumes:
@@ -30,6 +31,10 @@ services:
 
   evolution_api:
     container_name: evolution_api
+    environment:
+      - DATABASE_PROVIDER=mysql  # Sem aspas, tudo minúsculo
+      - DATABASE_URL=mysql://root:root@mysql:3306/evolution
+      - DB_SKIP_MIGRATIONS=false
     image: atendai/evolution-api:v2.2.0
     restart: always
     ports:
@@ -56,15 +61,15 @@ services:
     ports:
       - "3001:3000"  # Escolha entre 3000 ou 3001, não ambos
     volumes:
-      - ./src/backend:/usr/src/app/src/backend
-      - /usr/src/app/src/backend/node_modules
+      - ./src/backend:/usr/src/app/src/backend  # Mapeamento correto
+      - /usr/src/app/node_modules
     restart: unless-stopped
     environment:
       - PORT=3000
       - DB_HOST=mysql
       - DB_USER=root
       - DB_PASSWORD=root
-      - DB_NAME=evolution
+      - DB_NAME=TrayWhatsDB
     env_file:
       - .env
     depends_on:

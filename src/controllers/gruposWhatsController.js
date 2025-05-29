@@ -23,6 +23,7 @@ const GruposWhatsController = {
         // Se tudo der certo, ele retorna status 200 com o seguinte json:
         res.status(201).json({ 
             success: true,
+            id: result.insertId,
             nome_do_grupo,
             link_de_convite,
             capacidade_max

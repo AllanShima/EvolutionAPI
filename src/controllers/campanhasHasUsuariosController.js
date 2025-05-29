@@ -30,7 +30,7 @@ const Campanhas_Has_Usuarios_Controller = {
     } catch (err) {
         console.error('Erro detalhado:', err);
         res.status(500).json({ 
-            error: 'Erro ao criar Relação de Campanha e Usuário (Campanhas_has_Usuários)',
+            error: 'Erro ao atualizar Relação (Campanhas_has_Usuários). Talvez não existe CampanhaID ou UsuárioID?',
             details: err.message 
         });
     }
@@ -73,7 +73,7 @@ const Campanhas_Has_Usuarios_Controller = {
     } catch (err) {
         console.error('Erro detalhado:', err);
         res.status(500).json({ 
-            error: 'Erro ao atualizar relação de campanha e usuário',
+            error: 'Erro ao atualizar Relação (Campanhas_has_Usuários). Talvez não existe CampanhaID ou UsuárioID?',
             details: err.message 
         });
     }

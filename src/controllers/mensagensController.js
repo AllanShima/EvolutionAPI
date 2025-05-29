@@ -6,9 +6,9 @@ const MensagensController = {
     try {
         console.log('Corpo recebido:', req.body); // Para debug
         
-        const { mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, Lojista_ID, Lojista_GrupoWhatsapp_ID } = req.body;
+        const { mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, lojista_id, lojista_grupo_whatsapp_id } = req.body;
         
-        if (!mensagem_de_texto || !marcado_para || !criado_em || !foi_enviado || !enviado_em || !Lojista_ID || !Lojista_GrupoWhatsapp_ID) {
+        if (!mensagem_de_texto || !marcado_para || criado_em === undefined || foi_enviado === undefined || !lojista_id || !lojista_grupo_whatsapp_id) {
             return res.status(400).json({ 
                 error: 'Dados incompletos',
                 message: 'Todos os dados são obrigatórios'
@@ -18,29 +18,29 @@ const MensagensController = {
         // Verifica se existe o lojista e o grupo whats 
         const [lojista] = await db.query(
             'SELECT ID FROM Lojista WHERE ID = ? LIMIT 1',
-            [Lojista_ID]
+            [lojista_id]
         );
         if (!lojista || lojista.length === 0) {
             return res.status(404).json({
                 error: 'Lojista não encontrado',
-                message: `Nenhum lojista encontrado com ID ${Lojista_ID}`
+                message: `Nenhum lojista encontrado com ID ${lojista_id}`
             });
         }
 
         const [grupowhats] = await db.query(
             'SELECT ID FROM `Grupo Whatsapp` WHERE ID = ? LIMIT 1',
-            [Lojista_GrupoWhatsapp_ID]
+            [lojista_grupo_whatsapp_id]
         );
         if (!grupowhats || grupowhats.length === 0) {
             return res.status(404).json({
                 error: 'Grupo WhatsApp não encontrado',
-                message: `Nenhum grupo encontrado com ID ${Lojista_GrupoWhatsapp_ID}`
+                message: `Nenhum grupo encontrado com ID ${lojista_grupo_whatsapp_id}`
             });
         }
 
         const [result] = await db.query(
-            'INSERT INTO Mensagens (mensagem_de_texto, marcado_para, criado_em, foi_enviado?, enviado_em, Lojista_ID, `Lojista_Grupo Whatsapp_ID`) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, Lojista_ID, Lojista_GrupoWhatsapp_ID]
+            'INSERT INTO Mensagens (mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, lojista_id, lojista_grupo_whatsapp_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [mensagem_de_texto, marcado_para || null, criado_em, foi_enviado, enviado_em || null, lojista_id, lojista_grupo_whatsapp_id]
         );
 
         // Se tudo der certo, ele retorna status 200 com o seguinte json:
@@ -51,8 +51,8 @@ const MensagensController = {
             marcado_para,
             criado_em,
             foi_enviado,
-            Lojista_ID,
-            Lojista_GrupoWhatsapp_ID
+            lojista_id,
+            lojista_grupo_whatsapp_id
         });
 
     } catch (err) {
@@ -67,10 +67,10 @@ const MensagensController = {
   async atualizar(req, res) {
     try {
         const { id } = req.params; // ID da campanha a ser atualizada
-        const { mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, Lojista_ID, Lojista_GrupoWhatsapp_ID } = req.body;
+        const { mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, lojista_id, lojista_grupo_whatsapp_id } = req.body;
 
         // Validação
-        if (!mensagem_de_texto || !marcado_para || !criado_em || !foi_enviado || !enviado_em || !Lojista_ID || !Lojista_GrupoWhatsapp_ID) {
+        if (!mensagem_de_texto || !marcado_para || criado_em === undefined || foi_enviado === undefined || !lojista_id || !lojista_grupo_whatsapp_id) {
             return res.status(400).json({ 
                 error: 'Dados incompletos',
                 message: 'Todos os dados são obrigatórios'
@@ -80,30 +80,30 @@ const MensagensController = {
         // Verifica se existe o lojista e o grupo whats 
         const [lojista] = await db.query(
             'SELECT ID FROM Lojista WHERE ID = ? LIMIT 1',
-            [Lojista_ID]
+            [lojista_id]
         );
         if (!lojista || lojista.length === 0) {
             return res.status(404).json({
                 error: 'Lojista não encontrado',
-                message: `Nenhum lojista encontrado com ID ${Lojista_ID}`
+                message: `Nenhum lojista encontrado com ID ${lojista_id}`
             });
         }
 
         const [grupowhats] = await db.query(
             'SELECT ID FROM `Grupo Whatsapp` WHERE ID = ? LIMIT 1',
-            [Lojista_GrupoWhatsapp_ID]
+            [lojista_grupo_whatsapp_id]
         );
         if (!grupowhats || grupowhats.length === 0) {
             return res.status(404).json({
                 error: 'Grupo WhatsApp não encontrado',
-                message: `Nenhum grupo encontrado com ID ${Lojista_GrupoWhatsapp_ID}`
+                message: `Nenhum grupo encontrado com ID ${lojista_grupo_whatsapp_id}`
             });
         }
 
         // Atualiza
         const [result] = await db.query(
-            'UPDATE Mensagens SET mensagem_de_texto = ?, marcado_para = ?, criado_em = ?, foi_enviado? = ?, enviado_em = ?, Lojista_ID = ?, `Lojista_Grupo Whatsapp_ID` = ? WHERE ID = ?',
-            [mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, Lojista_ID, Lojista_GrupoWhatsapp_ID, id]
+            'UPDATE Mensagens SET mensagem_de_texto = ?, marcado_para = ?, criado_em = ?, foi_enviado = ?, enviado_em = ?, lojista_id = ?, lojista_grupo_whatsapp_id = ? WHERE ID = ?',
+            [mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, lojista_id, lojista_grupo_whatsapp_id, id]
         );
 
         // Verifica se foi atualizado
@@ -122,8 +122,8 @@ const MensagensController = {
             marcado_para,
             criado_em,
             foi_enviado,
-            Lojista_ID,
-            Lojista_GrupoWhatsapp_ID
+            lojista_id,
+            lojista_grupo_whatsapp_id
         });
 
     } catch (err) {

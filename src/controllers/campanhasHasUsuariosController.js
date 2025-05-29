@@ -6,25 +6,25 @@ const Campanhas_Has_Usuarios_Controller = {
     try {
         console.log('Corpo recebido:', req.body); // Para debug
         
-        const { Campanhas_ID, Usuários_ID } = req.body;
+        const { campanhas_id, usuarios_id } = req.body;
         
-        if (!Campanhas_ID || !Usuários_ID) {
+        if (!campanhas_id || !usuarios_id) {
             return res.status(400).json({ 
                 error: 'Dados incompletos',
-                message: 'Os IDS de Campanhas_ID e Usuários_ID são obrigatórios'
+                message: 'Os IDS de campanhas_id e usuarios_id são obrigatórios'
             });
         }
 
         const [result] = await db.query(
-            'INSERT INTO Campanhas_has_Usuários (Campanhas_ID, Usuários_ID) VALUES (?, ?)',
-            [Campanhas_ID, Usuários_ID]
+            'INSERT INTO Campanhas_has_Usuários (campanhas_id, usuarios_id) VALUES (?, ?)',
+            [campanhas_id, usuarios_id]
         );
 
         // Se tudo der certo, ele retorna status 200 com o seguinte json:
         res.status(201).json({ 
             success: true,
-            Campanhas_ID,
-            Usuários_ID
+            campanhas_id,
+            usuarios_id
         });
 
     } catch (err) {
@@ -39,20 +39,20 @@ const Campanhas_Has_Usuarios_Controller = {
   async atualizar(req, res) {
     try {
         const { id } = req.params; // ID da campanha a ser atualizada
-        const { Campanhas_ID, Usuários_ID } = req.body;
+        const { campanhas_id, usuarios_id } = req.body;
 
         // Validação
-        if (!Campanhas_ID || !Usuários_ID) {
+        if (!campanhas_id || !usuarios_id) {
             return res.status(400).json({ 
                 error: 'Dados incompletos',
-                message: 'Os IDS de Campanhas_ID e Usuários_ID são obrigatórios'
+                message: 'Os IDS de campanhas_id e usuarios_id são obrigatórios'
             });
         }
 
         // Atualiza
         const [result] = await db.query(
-            'UPDATE Campanhas_has_Usuários SET Campanhas_ID = ?, Usuários_ID = ? WHERE ID = ?',
-            [Campanhas_ID, Usuários_ID, id]
+            'UPDATE Campanhas_has_Usuários SET campanhas_id = ?, usuarios_id = ? WHERE ID = ?',
+            [campanhas_id, usuarios_id, id]
         );
 
         // Verifica se foi atualizado
@@ -66,8 +66,8 @@ const Campanhas_Has_Usuarios_Controller = {
         // Resposta de sucesso
         res.status(200).json({ 
             success: true,
-            Campanhas_ID,
-            Usuários_ID
+            campanhas_id,
+            usuarios_id
         });
 
     } catch (err) {
@@ -107,7 +107,7 @@ const Campanhas_Has_Usuarios_Controller = {
 
         // Verificando se existe
         const [campanha] = await db.query(
-            'SELECT ID FROM Campanhas_has_Usuários WHERE Campanhas_ID = ? LIMIT 1',
+            'SELECT ID FROM Campanhas_has_Usuários WHERE campanhas_id = ? LIMIT 1',
             [id]
         );
 
@@ -120,7 +120,7 @@ const Campanhas_Has_Usuarios_Controller = {
 
         // Depois finalmente deletar
         const [result] = await db.query(
-            'DELETE FROM Campanha_has_Usuários WHERE Campanhas_ID = ?',
+            'DELETE FROM Campanha_has_Usuários WHERE campanhas_id = ?',
             [id]
         );
 

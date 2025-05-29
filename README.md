@@ -15,11 +15,15 @@ Pra rodar:
 - Abra o Docker Desktop (ou instala primeiro);
 - Roda no terminal "docker compose up -d"
 
-No Mysql Workbench, crie o banco de dados com o arquivo "meuBancoDeDados.sql"
+No Mysql Workbench, crie o banco de dados com o arquivo "TrayWhatsDB.sql"
 
 Sempre que quiser iniciar ele, aperta Play direto no docker, ou digita no terminal do projeto "docker compose up"
 
 Para visualizar o endereço da API. Clica no link que aparece em 'evolution api' no Docker.
+
+Utiliza as urls da coleção do postman "TrayWhats.postman" também no projeto
+
+-------------
 
 Siga os comandos a seguir para manuseiar o projeto:
 

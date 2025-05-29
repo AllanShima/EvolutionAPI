@@ -16,7 +16,7 @@ const UsuariosController = {
         }
 
         const [result] = await db.query(
-            'INSERT INTO Usuários (telefone) VALUES (?, ?)',
+            'INSERT INTO Usuários (telefone) VALUES (?)',
             [telefone]
         );
 

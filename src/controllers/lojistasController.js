@@ -39,7 +39,7 @@ const LojistasController = {
 
   async atualizar(req, res) {
     try {
-        const { id_lojista } = req.params; // ID da campanha a ser atualizada
+        const { id } = req.params; // ID da campanha a ser atualizada
         const { nome_da_loja, id_da_instancia } = req.body;
 
         // Validação
@@ -53,7 +53,7 @@ const LojistasController = {
         // Atualiza
         const [result] = await db.query(
             'UPDATE Lojista SET nome_da_loja = ?, id_da_instancia = ? WHERE ID = ?',
-            [nome_da_loja, id_da_instancia, id_lojista]
+            [nome_da_loja, id_da_instancia, id]
         );
 
         // Verifica se foi atualizado
@@ -67,7 +67,7 @@ const LojistasController = {
         // Resposta de sucesso
         res.status(200).json({ 
             success: true,
-            id_lojista, 
+            id, 
             nome_da_loja,
             id_da_instancia
         });
@@ -81,7 +81,7 @@ const LojistasController = {
     }
   },
 
-  async listar(res) {
+  async listar(req, res) {
     try {
 
         console.log('Executando query: SELECT * FROM Lojista');
@@ -105,12 +105,12 @@ const LojistasController = {
 
   async deletar(req, res) {
     try {
-        const { id_lojista } = req.params;
+        const { id } = req.params;
 
         // Verificando se existe
         const [campanha] = await db.query(
             'SELECT ID FROM Lojista WHERE ID = ? LIMIT 1',
-            [id_lojista]
+            [id]
         );
 
         if (!campanha || campanha.length === 0) {
@@ -123,7 +123,7 @@ const LojistasController = {
         // Depois finalmente deletar
         const [result] = await db.query(
             'DELETE FROM Lojista WHERE ID = ?',
-            [id_lojista]
+            [id]
         );
 
         // Verificar se foi realmente deletado
@@ -137,7 +137,7 @@ const LojistasController = {
         res.status(200).json({
             success: true,
             message: 'Lojista removido com sucesso',
-            id_lojista
+            id
         });
 
     } catch (err) {

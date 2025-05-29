@@ -39,7 +39,7 @@ const GruposWhatsController = {
 
   async atualizar(req, res) {
     try {
-        const { id_grupoWhats } = req.params; // ID da campanha a ser atualizada
+        const { id } = req.params; // ID da campanha a ser atualizada
         const { nome_do_grupo, link_de_convite, capacidade_max } = req.body;
 
         // Validação
@@ -53,7 +53,7 @@ const GruposWhatsController = {
         // Atualiza
         const [result] = await db.query(
             'UPDATE `Grupo Whatsapp` SET nome_do_grupo = ?, link_de_convite = ?, capacidade_max = ? WHERE ID = ?',
-            [nome_do_grupo, link_de_convite, capacidade_max, id_grupoWhats]
+            [nome_do_grupo, link_de_convite, capacidade_max, id]
         );
 
         // Verifica se foi atualizado
@@ -67,7 +67,7 @@ const GruposWhatsController = {
         // Resposta de sucesso
         res.status(200).json({ 
             success: true,
-            id_grupoWhats, 
+            id, 
             nome_do_grupo,
             link_de_convite,
             capacidade_max
@@ -82,7 +82,7 @@ const GruposWhatsController = {
     }
   },
 
-  async listar(res) {
+  async listar(req, res) {
     try {
 
         console.log('Executando query: SELECT * FROM `Grupo Whatsapp`');
@@ -106,12 +106,12 @@ const GruposWhatsController = {
 
   async deletar(req, res) {
     try {
-        const { id_grupoWhats } = req.params;
+        const { id } = req.params;
 
         // Verificando se existe
         const [campanha] = await db.query(
             'SELECT ID FROM `Grupo Whatsapp` WHERE ID = ? LIMIT 1',
-            [id_grupoWhats]
+            [id]
         );
 
         if (!campanha || campanha.length === 0) {
@@ -124,7 +124,7 @@ const GruposWhatsController = {
         // Depois finalmente deletar
         const [result] = await db.query(
             'DELETE FROM `Grupo Whatsapp` WHERE ID = ?',
-            [id_grupoWhats]
+            [id]
         );
 
         // Verificar se foi realmente deletado
@@ -138,7 +138,7 @@ const GruposWhatsController = {
         res.status(200).json({
             success: true,
             message: 'Grupo Whats removido com sucesso',
-            id_grupoWhats
+            id
         });
 
     } catch (err) {

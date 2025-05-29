@@ -21,8 +21,7 @@ const CampanhasController = {
             success: true,
             id: result.insertId, 
             nome_da_campanha, 
-            descricao,
-            id_usuario
+            descricao
         });
 
     } catch (err) {
@@ -37,7 +36,7 @@ const CampanhasController = {
   // Atualizar Campanha
   async atualizar(req, res) {
     try {
-        const { id_campanha } = req.params; // ID da campanha a ser atualizada
+        const { id } = req.params; // ID da campanha a ser atualizada. O parametro tem que corresponder com o router
         const { nome_da_campanha, descricao } = req.body;
 
         // Validação
@@ -48,16 +47,26 @@ const CampanhasController = {
             });
         }
 
+        // 1. Verifica se a campanha existe
+        const [campanha] = await db.query('SELECT ID FROM Campanhas WHERE id = ?', [id]);
+        
+        if (!campanha || campanha.length === 0) {
+            return res.status(404).json({ 
+                error: 'Campanha não encontrada',
+                message: `Nenhuma campanha encontrada com ID ${id}` 
+            });
+        }
+
         // Atualiza a campanha
         const [result] = await db.query(
             'UPDATE Campanhas SET nome_da_campanha = ?, descricao = ? WHERE ID = ?',
-            [nome_da_campanha, descricao, id_campanha]
+            [nome_da_campanha, descricao, id]
         );
 
         // Atualiza a Campanhas_has_Usuarios SE o ID mudar
         // await db.query(
         //     'UPDATE Campanhas_has_Usuários SET Campanhas_ID = ? WHERE ID = ?',
-        //     [nome_da_campanha, descricao, id_campanha]
+        //     [nome_da_campanha, descricao, id]
         // );
 
         // Verifica se a campanha foi atualizada
@@ -71,7 +80,7 @@ const CampanhasController = {
         // Resposta de sucesso
         res.status(200).json({ 
             success: true,
-            id_campanha,
+            id,
             nome_da_campanha, 
             descricao
         });
@@ -87,7 +96,7 @@ const CampanhasController = {
 
 
   // Listar Campanhas
-  async listar(res) {
+  async listar(req, res) { //req precisa ser adicionado msm n sendo usado para a função res.json funcionar. No Express, res deve ser o segundo parâmetro da rota.
     try {
         console.log('Executando query: SELECT * FROM Campanhas');
 
@@ -108,12 +117,12 @@ const CampanhasController = {
   // Deletar Campanha
   async deletar(req, res) {
     try {
-        const { id_campanha } = req.params;
+        const { id } = req.params;
 
         // 1. Verificar se a campanha existe
         const [campanha] = await db.query(
             'SELECT ID FROM Campanhas WHERE ID = ? LIMIT 1',
-            [id_campanha]
+            [id]
         );
 
         if (!campanha || campanha.length === 0) {
@@ -122,17 +131,20 @@ const CampanhasController = {
                 message: 'O ID da campanha fornecido não existe'
             });
         }
+        // !campanha: Verifica se campanha é null ou undefined (improvável nesse caso, mas é boa prática)
+        // campanha.length === 0: Verifica se o array está vazio (ou seja, a consulta não retornou resultados)
 
-        // 2. Primeiro deletar os relacionamentos (para evitar erro de chave estrangeira)
-        await db.query(
-            'DELETE FROM Campanhas_has_Usuários WHERE ID = ?',
-            [id_campanha]
+        // 2. Verificando se há relacionamento, e deletando ele pra n causar problema
+
+        const [relacionamento] = await db.query(
+            'DELETE FROM Campanhas_has_Usuários WHERE Campanhas_ID = ?',
+            [id]
         );
 
         // 3. Depois deletar a campanha
         const [result] = await db.query(
             'DELETE FROM Campanhas WHERE ID = ?',
-            [id_campanha]
+            [id]
         );
 
         // Verificar se foi realmente deletado
@@ -146,7 +158,7 @@ const CampanhasController = {
         res.status(200).json({
             success: true,
             message: 'Campanha e seus relacionamentos foram removidos com sucesso',
-            id_campanha: id_campanha
+            id: id
         });
 
     } catch (err) {

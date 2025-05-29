@@ -15,6 +15,29 @@ const MensagensController = {
             });
         }
 
+        // Verifica se existe o lojista e o grupo whats 
+        const [lojista] = await db.query(
+            'SELECT ID FROM Lojista WHERE ID = ? LIMIT 1',
+            [Lojista_ID]
+        );
+        if (!lojista || lojista.length === 0) {
+            return res.status(404).json({
+                error: 'Lojista não encontrado',
+                message: `Nenhum lojista encontrado com ID ${Lojista_ID}`
+            });
+        }
+
+        const [grupowhats] = await db.query(
+            'SELECT ID FROM `Grupo Whatsapp` WHERE ID = ? LIMIT 1',
+            [Lojista_GrupoWhatsapp_ID]
+        );
+        if (!grupowhats || grupowhats.length === 0) {
+            return res.status(404).json({
+                error: 'Grupo WhatsApp não encontrado',
+                message: `Nenhum grupo encontrado com ID ${Lojista_GrupoWhatsapp_ID}`
+            });
+        }
+
         const [result] = await db.query(
             'INSERT INTO Mensagens (mensagem_de_texto, marcado_para, criado_em, foi_enviado?, enviado_em, Lojista_ID, `Lojista_Grupo Whatsapp_ID`) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, Lojista_ID, Lojista_GrupoWhatsapp_ID]
@@ -43,7 +66,7 @@ const MensagensController = {
 
   async atualizar(req, res) {
     try {
-        const { id_mensagem } = req.params; // ID da campanha a ser atualizada
+        const { id } = req.params; // ID da campanha a ser atualizada
         const { mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, Lojista_ID, Lojista_GrupoWhatsapp_ID } = req.body;
 
         // Validação
@@ -54,10 +77,33 @@ const MensagensController = {
             });
         }
 
+        // Verifica se existe o lojista e o grupo whats 
+        const [lojista] = await db.query(
+            'SELECT ID FROM Lojista WHERE ID = ? LIMIT 1',
+            [Lojista_ID]
+        );
+        if (!lojista || lojista.length === 0) {
+            return res.status(404).json({
+                error: 'Lojista não encontrado',
+                message: `Nenhum lojista encontrado com ID ${Lojista_ID}`
+            });
+        }
+
+        const [grupowhats] = await db.query(
+            'SELECT ID FROM `Grupo Whatsapp` WHERE ID = ? LIMIT 1',
+            [Lojista_GrupoWhatsapp_ID]
+        );
+        if (!grupowhats || grupowhats.length === 0) {
+            return res.status(404).json({
+                error: 'Grupo WhatsApp não encontrado',
+                message: `Nenhum grupo encontrado com ID ${Lojista_GrupoWhatsapp_ID}`
+            });
+        }
+
         // Atualiza
         const [result] = await db.query(
             'UPDATE Mensagens SET mensagem_de_texto = ?, marcado_para = ?, criado_em = ?, foi_enviado? = ?, enviado_em = ?, Lojista_ID = ?, `Lojista_Grupo Whatsapp_ID` = ? WHERE ID = ?',
-            [mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, Lojista_ID, Lojista_GrupoWhatsapp_ID, id_mensagem]
+            [mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, Lojista_ID, Lojista_GrupoWhatsapp_ID, id]
         );
 
         // Verifica se foi atualizado
@@ -71,7 +117,7 @@ const MensagensController = {
         // Resposta de sucesso
         res.status(201).json({ 
             success: true,
-            id_mensagem,
+            id,
             mensagem_de_texto,
             marcado_para,
             criado_em,
@@ -89,7 +135,7 @@ const MensagensController = {
     }
   },
 
-  async listar(res) {
+  async listar(req, res) {
     try {
 
         console.log('Executando query: SELECT * FROM Mensagens');
@@ -113,12 +159,12 @@ const MensagensController = {
 
   async deletar(req, res) {
     try {
-        const { id_mensagem } = req.params;
+        const { id } = req.params;
 
         // Verificando se existe
         const [campanha] = await db.query(
             'SELECT ID FROM Mensagens WHERE ID = ? LIMIT 1',
-            [id_mensagem]
+            [id]
         );
 
         if (!campanha || campanha.length === 0) {
@@ -131,7 +177,7 @@ const MensagensController = {
         // Depois finalmente deletar
         const [result] = await db.query(
             'DELETE FROM Mensagens WHERE ID = ?',
-            [id_mensagem]
+            [id]
         );
 
         // Verificar se foi realmente deletado
@@ -145,7 +191,7 @@ const MensagensController = {
         res.status(200).json({
             success: true,
             message: 'Mensagem removido com sucesso',
-            id_mensagem
+            id
         });
 
     } catch (err) {

@@ -38,7 +38,7 @@ const UsuariosController = {
 
   async atualizar(req, res) {
     try {
-        const { id_usuario } = req.params; // ID da campanha a ser atualizada
+        const { id } = req.params; // ID da campanha a ser atualizada
         const { telefone } = req.body;
 
         // Validação
@@ -52,7 +52,7 @@ const UsuariosController = {
         // Atualiza
         const [result] = await db.query(
             'UPDATE Usuários SET telefone = ? WHERE ID = ?',
-            [telefone, id_usuario]
+            [telefone, id]
         );
 
         // Atualiza a Campanhas_has_Usuarios SE o ID mudar
@@ -72,7 +72,7 @@ const UsuariosController = {
         // Resposta de sucesso
         res.status(200).json({ 
             success: true,
-            id_usuario,
+            id,
             telefone
         });
 
@@ -85,7 +85,7 @@ const UsuariosController = {
     }
   },
 
-  async listar(res) {
+  async listar(req, res) {
     try {
 
         console.log('Executando query: SELECT * FROM Usuários');
@@ -109,12 +109,12 @@ const UsuariosController = {
 
   async deletar(req, res) {
     try {
-        const { id_usuario } = req.params;
+        const { id } = req.params;
 
         // Verificando se existe
         const [usuario] = await db.query(
             'SELECT ID FROM Campanhas WHERE ID = ? LIMIT 1',
-            [id_usuario]
+            [id]
         );
 
         if (!usuario || usuario.length === 0) {
@@ -126,14 +126,14 @@ const UsuariosController = {
 
         // Primeiro deletar os relacionamentos (para evitar erro de chave estrangeira)
         await db.query(
-            'DELETE FROM Campanhas_has_Usuários WHERE ID = ?',
-            [id_usuario]
+            'DELETE FROM Campanhas_has_Usuários WHERE Campanhas_ID = ?',
+            [id]
         );
 
         // Depois finalmente deletar
         const [result] = await db.query(
             'DELETE FROM Usuários WHERE ID = ?',
-            [id_usuario]
+            [id]
         );
 
         // Verificar se foi realmente deletado
@@ -147,7 +147,7 @@ const UsuariosController = {
         res.status(200).json({
             success: true,
             message: 'Usuário e seus relacionamentos foram removidos com sucesso',
-            id_usuario: id_usuario
+            id: id
         });
 
     } catch (err) {

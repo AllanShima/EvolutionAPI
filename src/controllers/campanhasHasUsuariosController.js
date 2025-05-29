@@ -38,7 +38,7 @@ const Campanhas_Has_Usuarios_Controller = {
 
   async atualizar(req, res) {
     try {
-        const { id_campanha } = req.params; // ID da campanha a ser atualizada
+        const { id } = req.params; // ID da campanha a ser atualizada
         const { Campanhas_ID, Usuários_ID } = req.body;
 
         // Validação
@@ -52,7 +52,7 @@ const Campanhas_Has_Usuarios_Controller = {
         // Atualiza
         const [result] = await db.query(
             'UPDATE Campanhas_has_Usuários SET Campanhas_ID = ?, Usuários_ID = ? WHERE ID = ?',
-            [Campanhas_ID, Usuários_ID, id_campanha]
+            [Campanhas_ID, Usuários_ID, id]
         );
 
         // Verifica se foi atualizado
@@ -79,7 +79,7 @@ const Campanhas_Has_Usuarios_Controller = {
     }
   },
 
-  async listar(res) {
+  async listar(req, res) {
     try {
 
         console.log('Executando query: SELECT * FROM Campanhas_has_Usuários');
@@ -103,12 +103,12 @@ const Campanhas_Has_Usuarios_Controller = {
 
   async deletar(req, res) {
     try {
-        const { id_campanha } = req.params;
+        const { id } = req.params;
 
         // Verificando se existe
         const [campanha] = await db.query(
-            'SELECT ID FROM Campanhas_has_Usuários WHERE ID = ? LIMIT 1',
-            [id_campanha]
+            'SELECT ID FROM Campanhas_has_Usuários WHERE Campanhas_ID = ? LIMIT 1',
+            [id]
         );
 
         if (!campanha || campanha.length === 0) {
@@ -120,8 +120,8 @@ const Campanhas_Has_Usuarios_Controller = {
 
         // Depois finalmente deletar
         const [result] = await db.query(
-            'DELETE FROM Campanha_has_Usuários WHERE ID = ?',
-            [id_campanha]
+            'DELETE FROM Campanha_has_Usuários WHERE Campanhas_ID = ?',
+            [id]
         );
 
         // Verificar se foi realmente deletado
@@ -135,7 +135,7 @@ const Campanhas_Has_Usuarios_Controller = {
         res.status(200).json({
             success: true,
             message: 'Relacionamento removido com sucesso',
-            id_campanha
+            id
         });
 
     } catch (err) {

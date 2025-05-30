@@ -20,16 +20,17 @@ services:
       - minha_rede
 
   redis:
-    image: redis:alpine
+    image: redis:6.2-alpine  # Versão mais estável
     container_name: redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    command: redis-server --appendonly yes --save 60 1 --requirepass evolution123  # Adicione uma senha
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "evolution123", "ping"]
       interval: 5s
-      timeout: 5s
+      timeout: 10s
       retries: 10
     networks:
       - minha_rede
@@ -37,11 +38,17 @@ services:
   evolution_api:
     container_name: evolution_api
     environment:
-      - DATABASE_PROVIDER=mysql  # Sem aspas, tudo minúsculo
-      - DATABASE_URL=mysql://root:root@mysql:3306/evolution
-      - DB_SKIP_MIGRATIONS=false
+      - CORS_ENABLED=true
+      - CORS_ORIGIN=*
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=evolution123  # Mesma senha do Redis
+      - REDIS_DB=0
+      - REDIS_PREFIX_KEY=evolution
+      - REDIS_RECONNECT_DELAY=5000  # Tempo entre tentativas
+      - REDIS_CONNECTION_TIMEOUT=10000  # 10 segundos
     image: atendai/evolution-api:v2.2.0
-    restart: always
+    restart: unless-stopped
     ports:
       - "8080:8080"
     env_file:
@@ -52,8 +59,13 @@ services:
       mysql:
         condition: service_healthy
       redis:
-        condition: service_healthy  
-    command: sh -c "sleep 15 && npx prisma migrate deploy && node dist/main.js"
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: sh -c "sleep 30 && npx prisma migrate deploy && node dist/main.js"
     networks:
       - minha_rede
 

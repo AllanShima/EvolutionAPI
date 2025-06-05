@@ -6,9 +6,9 @@ const MensagensController = {
     try {
         console.log('Corpo recebido:', req.body); // Para debug
         
-        const { mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, lojista_id, lojista_grupo_whatsapp_id } = req.body;
+        const { mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, lojista_id, lojista_campanha_id } = req.body;
         
-        if (!mensagem_de_texto || !marcado_para || criado_em === undefined || foi_enviado === undefined || !lojista_id || !lojista_grupo_whatsapp_id) {
+        if (!mensagem_de_texto || !marcado_para || criado_em === undefined || foi_enviado === undefined || !lojista_id || !lojista_campanha_id) {
             return res.status(400).json({ 
                 error: 'Dados incompletos',
                 message: 'Todos os dados são obrigatórios'
@@ -29,18 +29,18 @@ const MensagensController = {
 
         const [grupowhats] = await db.query(
             'SELECT ID FROM `Grupo Whatsapp` WHERE ID = ? LIMIT 1',
-            [lojista_grupo_whatsapp_id]
+            [lojista_campanha_id]
         );
         if (!grupowhats || grupowhats.length === 0) {
             return res.status(404).json({
                 error: 'Grupo WhatsApp não encontrado',
-                message: `Nenhum grupo encontrado com ID ${lojista_grupo_whatsapp_id}`
+                message: `Nenhuma Campanha encontrado com ID ${lojista_campanha_id}`
             });
         }
 
         const [result] = await db.query(
-            'INSERT INTO Mensagens (mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, lojista_id, lojista_grupo_whatsapp_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [mensagem_de_texto, marcado_para || null, criado_em, foi_enviado, enviado_em || null, lojista_id, lojista_grupo_whatsapp_id]
+            'INSERT INTO Mensagens (mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, lojista_id, lojista_campanha_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [mensagem_de_texto, marcado_para || null, criado_em, foi_enviado, enviado_em || null, lojista_id, lojista_campanha_id]
         );
 
         // Se tudo der certo, ele retorna status 200 com o seguinte json:
@@ -52,7 +52,7 @@ const MensagensController = {
             criado_em,
             foi_enviado,
             lojista_id,
-            lojista_grupo_whatsapp_id
+            lojista_campanha_id
         });
 
     } catch (err) {
@@ -67,10 +67,10 @@ const MensagensController = {
   async atualizar(req, res) {
     try {
         const { id } = req.params; // ID da campanha a ser atualizada
-        const { mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, lojista_id, lojista_grupo_whatsapp_id } = req.body;
+        const { mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, lojista_id, lojista_campanha_id } = req.body;
 
         // Validação
-        if (!mensagem_de_texto || !marcado_para || criado_em === undefined || foi_enviado === undefined || !lojista_id || !lojista_grupo_whatsapp_id) {
+        if (!mensagem_de_texto || !marcado_para || criado_em === undefined || foi_enviado === undefined || !lojista_id || !lojista_campanha_id) {
             return res.status(400).json({ 
                 error: 'Dados incompletos',
                 message: 'Todos os dados são obrigatórios'
@@ -91,19 +91,19 @@ const MensagensController = {
 
         const [grupowhats] = await db.query(
             'SELECT ID FROM `Grupo Whatsapp` WHERE ID = ? LIMIT 1',
-            [lojista_grupo_whatsapp_id]
+            [lojista_campanha_id]
         );
         if (!grupowhats || grupowhats.length === 0) {
             return res.status(404).json({
                 error: 'Grupo WhatsApp não encontrado',
-                message: `Nenhum grupo encontrado com ID ${lojista_grupo_whatsapp_id}`
+                message: `Nenhuma Campanha encontrado com ID ${lojista_campanha_id}`
             });
         }
 
         // Atualiza
         const [result] = await db.query(
-            'UPDATE Mensagens SET mensagem_de_texto = ?, marcado_para = ?, criado_em = ?, foi_enviado = ?, enviado_em = ?, lojista_id = ?, lojista_grupo_whatsapp_id = ? WHERE ID = ?',
-            [mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, lojista_id, lojista_grupo_whatsapp_id, id]
+            'UPDATE Mensagens SET mensagem_de_texto = ?, marcado_para = ?, criado_em = ?, foi_enviado = ?, enviado_em = ?, lojista_id = ?, lojista_campanha_id = ? WHERE ID = ?',
+            [mensagem_de_texto, marcado_para, criado_em, foi_enviado, enviado_em, lojista_id, lojista_campanha_id, id]
         );
 
         // Verifica se foi atualizado
@@ -123,7 +123,7 @@ const MensagensController = {
             criado_em,
             foi_enviado,
             lojista_id,
-            lojista_grupo_whatsapp_id
+            lojista_campanha_id
         });
 
     } catch (err) {

@@ -5,15 +5,15 @@ const CampanhasController = {
   // Criar Campanha
   async criar(req, res) { //req é a requisição que será enviada, res: é como o servidor responderá à requisição
     try {
-      const { nome_da_campanha, descricao } = req.body;
+      const { nome_da_campanha, descricao, lojista_id } = req.body;
       
-      if (!nome_da_campanha || !descricao) {
+      if (!nome_da_campanha || !descricao || !lojista_id) {
         return res.status(400).json({ error: 'Dados incompletos' });
       }
 
       const [result] = await db.query(
-        'INSERT INTO Campanhas (nome_da_campanha, descricao) VALUES (?, ?)',
-        [nome_da_campanha, descricao]
+        'INSERT INTO Campanhas (nome_da_campanha, descricao, lojista_id) VALUES (?, ?, ?)',
+        [nome_da_campanha, descricao, lojista_id]
       );
 
         // Se tudo der certo, ele retorna status 200 com o seguinte json:
@@ -21,7 +21,8 @@ const CampanhasController = {
             success: true,
             id: result.insertId, 
             nome_da_campanha, 
-            descricao
+            descricao,
+            lojista_id
         });
 
     } catch (err) {
@@ -37,14 +38,11 @@ const CampanhasController = {
   async atualizar(req, res) {
     try {
         const { id } = req.params; // ID da campanha a ser atualizada. O parametro tem que corresponder com o router
-        const { nome_da_campanha, descricao } = req.body;
+        const { nome_da_campanha, descricao, lojista_id } = req.body;
 
         // Validação
-        if (!nome_da_campanha || !descricao) {
-            return res.status(400).json({ 
-                error: 'Dados incompletos',
-                message: 'Nome da campanha e descrição são obrigatórios' 
-            });
+        if (!nome_da_campanha || !descricao || !lojista_id) {
+            return res.status(400).json({ error: 'Dados incompletos',});
         }
 
         // 1. Verifica se a campanha existe
@@ -59,15 +57,9 @@ const CampanhasController = {
 
         // Atualiza a campanha
         const [result] = await db.query(
-            'UPDATE Campanhas SET nome_da_campanha = ?, descricao = ? WHERE ID = ?',
-            [nome_da_campanha, descricao, id]
+            'UPDATE Campanhas SET nome_da_campanha = ?, descricao = ?, lojista_id = ? WHERE ID = ?',
+            [nome_da_campanha, descricao, lojista_id, id]
         );
-
-        // Atualiza a Campanhas_has_Usuarios SE o ID mudar
-        // await db.query(
-        //     'UPDATE Campanhas_has_Usuários SET Campanhas_ID = ? WHERE ID = ?',
-        //     [nome_da_campanha, descricao, id]
-        // );
 
         // Verifica se a campanha foi atualizada
         if (result.affectedRows === 0) {
@@ -82,7 +74,8 @@ const CampanhasController = {
             success: true,
             id,
             nome_da_campanha, 
-            descricao
+            descricao,
+            lojista_id
         });
 
     } catch (err) {
@@ -113,6 +106,31 @@ const CampanhasController = {
         });
     }
   },
+
+  async obterPorID(req, res) { //req precisa ser adicionado msm n sendo usado para a função res.json funcionar. No Express, res deve ser o segundo parâmetro da rota.
+    try {
+        const { id } = req.params;
+
+        console.log('SELECT * FROM Campanhas WHERE ID = ?');
+
+        const [campanha] = await db.query(
+            'SELECT * FROM Campanhas WHERE ID = ?',
+            [id]
+        );
+
+
+        console.log('Resultado:', campanhas);
+        res.json(campanhas);
+
+    } catch (err) {
+        console.error('Erro na query:', err);
+        res.status(500).json({ 
+            error: 'Erro no servidor',
+            details: err.message 
+        });
+    }
+  },
+
 
   // Deletar Campanha
   async deletar(req, res) {

@@ -1,84 +1,80 @@
-version: '3.9'
 services:
   mysql:
-    image: mysql:8.0
+    image: mysql:8.0  # Troque para imagem oficial (mais estável no Windows)
     container_name: mysql
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: evolution
-      # MYSQL_DATABASE_TRAY: TrayWhatsDB (utilize ele pra criar o banco automaticamente)
+      MYSQL_USER: evolution_user
+      MYSQL_PASSWORD: evolution123
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./mysql/logs:/var/log/mysql  # Pasta local para logs
+    command: 
+      - --default-authentication-plugin=mysql_native_password
+      - --log-error=/var/log/mysql/error.log
+      - --innodb_use_native_aio=0  # Importante para Windows
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 5s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 20s
       retries: 10
     networks:
-      - minha_rede
+      - evolution-net
 
   redis:
-    image: redis:6.2-alpine  # Versão mais estável
+    image: redis:latest
     container_name: redis
-    ports:
-      - "6379:6379"
+    command: >
+      redis-server
+      --appendonly yes
+      --bind 0.0.0.0
+      --protected-mode no
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes --save 60 1 --requirepass evolution123  # Adicione uma senha
+    ports:
+      - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "evolution123", "ping"]
+      test: ["CMD", "redis-cli", "-a", "ping"]  # Adicione a senha
       interval: 5s
       timeout: 10s
       retries: 10
     networks:
-      - minha_rede
+      - evolution-net
 
   evolution_api:
-    container_name: evolution_api
     environment:
-      - CORS_ENABLED=true
-      - CORS_ORIGIN=*
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=evolution123  # Mesma senha do Redis
-      - REDIS_DB=0
-      - REDIS_PREFIX_KEY=evolution
-      - REDIS_RECONNECT_DELAY=5000  # Tempo entre tentativas
-      - REDIS_CONNECTION_TIMEOUT=10000  # 10 segundos
+      - CONFIG_SESSION_PHONE_VERSION=${CONFIG_SESSION_PHONE_VERSION}
+    container_name: evolution_api
     image: atendai/evolution-api:v2.2.0
-    restart: unless-stopped
+    restart: always
     ports:
       - "8080:8080"
     env_file:
       - .env
     volumes:
       - evolution_instances:/evolution/instances
-    depends_on:
-      mysql:
-        condition: service_healthy
+    depends_on:  # Adicione esta seção
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    command: sh -c "sleep 30 && npx prisma migrate deploy && node dist/main.js"
+      mysql:
+        condition: service_healthy
     networks:
-      - minha_rede
+      - evolution-net
 
   minha_api_node:
     container_name: minha_api_node
     build:
       context: .
       dockerfile: Dockerfile
-      no_cache: true  # Ignora cache na construção
+      no_cache: true
     ports:
-      - "3001:3000"  # Escolha entre 3000 ou 3001, não ambos
+      - "3001:3000"
     volumes:
-      - ./src/backend:/usr/src/app/src/backend  # Mapeamento correto
+      - ./src/backend:/usr/src/app/src/backend
       - /usr/src/app/node_modules
     restart: unless-stopped
     environment:
@@ -93,13 +89,13 @@ services:
       mysql:
         condition: service_healthy
     networks:
-      - minha_rede
+      - evolution-net  # Corrigido para usar a mesma rede
 
 networks:
-  minha_rede:
+  evolution-net:
     driver: bridge
 
 volumes:
   mysql_data:
-  redis_data:
-  evolution_instances:
+  redis_data:  # Volume adicionado para o Redis
+  evolution_instances:  # Corrigido o nome (estava "evolution_instances" no serviço)

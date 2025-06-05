@@ -6,26 +6,25 @@ const LojistasController = {
     try {
         console.log('Corpo recebido:', req.body); // Para debug
         
-        const { nome_da_loja, id_da_instancia } = req.body;
+        const { nome_da_loja } = req.body;
         
-        if (!nome_da_loja || !id_da_instancia) {
+        if (!nome_da_loja) {
             return res.status(400).json({ 
                 error: 'Dados incompletos',
-                message: 'Nome da loja e id da instância são obrigatórios'
+                message: 'Nome da loja é obrigatórios'
             });
         }
 
         const [result] = await db.query(
-            'INSERT INTO Lojista (nome_da_loja, id_da_instancia) VALUES (?, ?)',
-            [nome_da_loja, id_da_instancia]
+            'INSERT INTO Lojista (nome_da_loja) VALUES (?)',
+            [nome_da_loja]
         );
 
         // Se tudo der certo, ele retorna status 200 com o seguinte json:
         res.status(201).json({ 
             success: true,
             id: result.insertId,
-            nome_da_loja,
-            id_da_instancia
+            nome_da_loja
         });
 
     } catch (err) {
@@ -40,20 +39,20 @@ const LojistasController = {
   async atualizar(req, res) {
     try {
         const { id } = req.params; // ID da campanha a ser atualizada
-        const { nome_da_loja, id_da_instancia } = req.body;
+        const { nome_da_loja } = req.body;
 
         // Validação
-        if (!nome_da_loja || !id_da_instancia) {
+        if (!nome_da_loja) {
             return res.status(400).json({ 
                 error: 'Dados incompletos',
-                message: 'Nome da loja e id da instância são obrigatórios'
+                message: 'Nome da loja é obrigatório'
             });
         }
 
         // Atualiza
         const [result] = await db.query(
-            'UPDATE Lojista SET nome_da_loja = ?, id_da_instancia = ? WHERE ID = ?',
-            [nome_da_loja, id_da_instancia, id]
+            'UPDATE Lojista SET nome_da_loja = ? WHERE ID = ?',
+            [nome_da_loja, id]
         );
 
         // Verifica se foi atualizado
@@ -68,8 +67,7 @@ const LojistasController = {
         res.status(200).json({ 
             success: true,
             id, 
-            nome_da_loja,
-            id_da_instancia
+            nome_da_loja
         });
 
     } catch (err) {

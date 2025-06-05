@@ -6,18 +6,18 @@ const GruposWhatsController = {
     try {
         console.log('Corpo recebido:', req.body); // Para debug
         
-        const { nome_do_grupo, link_de_convite, capacidade_max } = req.body;
+        const { nome_do_grupo, link_de_convite, grupo_jid, capacidade_max, quantidade_atual, campanha_id } = req.body;
         
-        if (!nome_do_grupo || !link_de_convite || !capacidade_max) {
+        if (!nome_do_grupo || !link_de_convite || !grupo_jid || !capacidade_max || !quantidade_atual || !campanha_id) {
             return res.status(400).json({ 
                 error: 'Dados incompletos',
-                message: 'Nome do grupo, Link de convite e capacidade máx são obrigatórios'
+                message: 'Todos os dados são obrigatórios...'
             });
         }
 
         const [result] = await db.query(
-            'INSERT INTO `Grupo Whatsapp` (nome_do_grupo, link_de_convite, capacidade_max) VALUES (?, ?, ?)',
-            [nome_do_grupo, link_de_convite, capacidade_max]
+            'INSERT INTO `Grupo Whatsapp` (nome_do_grupo, link_de_convite, grupo_jid, capacidade_max, quantidade_atual, campanha_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [nome_do_grupo, link_de_convite, grupo_jid, capacidade_max, quantidade_atual, campanha_id]
         );
 
         // Se tudo der certo, ele retorna status 200 com o seguinte json:
@@ -26,7 +26,10 @@ const GruposWhatsController = {
             id: result.insertId,
             nome_do_grupo,
             link_de_convite,
-            capacidade_max
+            grupo_jid,
+            capacidade_max,
+            quantidade_atual,
+            campanha_id
         });
 
     } catch (err) {
@@ -41,20 +44,20 @@ const GruposWhatsController = {
   async atualizar(req, res) {
     try {
         const { id } = req.params; // ID da campanha a ser atualizada
-        const { nome_do_grupo, link_de_convite, capacidade_max } = req.body;
+        const { nome_do_grupo, link_de_convite, grupo_jid, capacidade_max, quantidade_atual, campanha_id } = req.body;
 
         // Validação
-        if (!nome_do_grupo || !link_de_convite || !capacidade_max) {
+        if (!nome_do_grupo || !link_de_convite || !grupo_jid || !capacidade_max || !quantidade_atual || !campanha_id) {
             return res.status(400).json({ 
                 error: 'Dados incompletos',
-                message: 'Nome do grupo, Link de convite e capacidade máx são obrigatórios'
+                message: 'Todos os dados são obrigatórios...'
             });
         }
 
         // Atualiza
         const [result] = await db.query(
-            'UPDATE `Grupo Whatsapp` SET nome_do_grupo = ?, link_de_convite = ?, capacidade_max = ? WHERE ID = ?',
-            [nome_do_grupo, link_de_convite, capacidade_max, id]
+            'UPDATE `Grupo Whatsapp` SET nome_do_grupo = ?, link_de_convite = ?, grupo_jid = ?, capacidade_max = ?, quantidade_atual = ?, campanha_id = ? WHERE ID = ?',
+            [nome_do_grupo, link_de_convite, grupo_jid, capacidade_max, quantidade_atual, campanha_id, id]
         );
 
         // Verifica se foi atualizado
@@ -71,7 +74,10 @@ const GruposWhatsController = {
             id, 
             nome_do_grupo,
             link_de_convite,
-            capacidade_max
+            grupo_jid,
+            capacidade_max,
+            quantidade_atual,
+            campanha_id
         });
 
     } catch (err) {
@@ -109,22 +115,22 @@ const GruposWhatsController = {
     try {
         const { id } = req.params;
 
-        // Verificando se existe
-        const [campanha] = await db.query(
-            'SELECT ID FROM `Grupo Whatsapp` WHERE ID = ? LIMIT 1',
+        // Verificando se existe algum grupo com este campanha_id
+        const [grupos] = await db.query(
+            'SELECT * FROM `Grupo Whatsapp` WHERE campanha_id = ?',
             [id]
         );
 
-        if (!campanha || campanha.length === 0) {
+        if (!grupos || grupos.length === 0) {
             return res.status(404).json({
-                error: 'Grupo Whats não encontrado',
-                message: 'O ID do Grupo Whats fornecido não existe'
+                error: 'Grupos não encontrados',
+                message: 'Nenhum grupo encontrado com o campanha_id fornecido'
             });
         }
 
-        // Depois finalmente deletar
+        // Deletar todos os grupos com este campanha_id
         const [result] = await db.query(
-            'DELETE FROM `Grupo Whatsapp` WHERE ID = ?',
+            'DELETE FROM `Grupo Whatsapp` WHERE campanha_id = ?',
             [id]
         );
 
@@ -132,14 +138,15 @@ const GruposWhatsController = {
         if (result.affectedRows === 0) {
             return res.status(404).json({
                 error: 'Nada foi deletado',
-                message: 'Nenhum Grupo Whats encontrado com este ID'
+                message: 'Nenhum grupo foi removido'
             });
         }
 
         res.status(200).json({
             success: true,
-            message: 'Grupo Whats removido com sucesso',
-            id
+            message: `${result.affectedRows} grupo(s) removido(s) com sucesso`,
+            campanha_id: id,
+            grupos_removidos: result.affectedRows
         });
 
     } catch (err) {

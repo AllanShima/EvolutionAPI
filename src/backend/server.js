@@ -3,7 +3,7 @@ const cors = require('cors');
 // const db = require('./db');
 const routes = require('../routes'); // Importa as rotas centralizadas
 const app = express();
-const PORT = process.env.PORT || 3001; // Use a variável de ambiente
+const PORT = process.env.PORT || 3000; // Use a variável de ambiente
 
 // Middlewares melhorados
 app.use(cors({

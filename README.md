@@ -40,7 +40,9 @@ docker-compose up -d --build
 
 -------
 
+Pra acessar o manager, a chave da api está no arquivo ".env"
+
 Essa API foi amplamente usada no projeto da faculdade sobre Campanhas de Whatsapp para a empresa Tray de Marília.
 
 OBS:
-- A versão precisa ser 2.2.0 pra conseguir criar os grupos do whats através de uma instância.
+- A versão precisa ser 2.2.0 pra conseguir criar os grupos do whats através de uma instância (por algum motivo só da pra criar nessa versão).
